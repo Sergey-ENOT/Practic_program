@@ -1,5 +1,6 @@
 from tkinter import *
-import xlrd
+import docx
+import xlrd2
 from tkinter import messagebox
 from datetime import datetime
 from docx import Document
@@ -54,7 +55,7 @@ def dateOff(event): # Функция для радиокнопки "Без да�
 
 
 def AnalysisWithDate(event): # Функция для проверки правильности ввода даты
-    radio_condition = radioButtonDateVar.get() # Заносим в переменную chrb состояние радиокнопок (1 или 0)
+    radio_condition = radioButtonDateVar.get() # Заносим в переменную radio_condition состояние радиокнопок (1 или 0)
 
     if radio_condition == 1: # Если радиокнопка "По дате" включена (1)
         dataFrom = textBoxFromDate.get()
@@ -81,28 +82,33 @@ def AnalysisWithDate(event): # Функция для проверки прави
 
 
 def Analysis(event): # Функция поиска уязвимостей
-    workbook = xlrd.open_workbook('D:/git_practic_program/vullist.xlsx')
+    workbook = xlrd2.open_workbook('D:/vullist(xls).xls')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
-    row = sheet.nrows
+    row = sheet.nrows            # количество строк
     names = sheet.col_values(4)
     danger_levels = sheet.col_values(12)
     danger_super, danger_high, danger_middle, danger_low = 0, 0, 0, 0
-    radio_condition_all = radioButtonDateVar.get()
+    #radio_condition_all = radioButtonDateVar.get()
     radio_condition = radioButtonDateVar.get()
     if radio_condition == 0: # Если радиокнопка "По дате" выключена (0)
-        dataFrom = '01.01.1900'
-        dataTo = '01.01.3000'
+        dataFrom = datetime.strptime('01.01.1900', '%d.%m.%Y')
+        dataTo = datetime.strptime('01.01.2300', '%d.%m.%Y')
     else:
-        dataFrom = textBoxFromDate.get()
-        dataTo = textBoxToDate.get()
-    dataFrom = datetime.strptime(dataFrom, '%d.%m.%Y')
-    dataTo = datetime.strptime(dataTo, '%d.%m.%Y')
-    sheet_var = sheet.col_values(22)
-    for i in range(4,row):
-        sheet_var[i] = datetime.strptime(sheet_var[i], '%d.%m.%Y')
+        dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
+        dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
+        # dataFrom = textBoxFromDate.get()
+        # dataTo = textBoxToDate.get()
+    # dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
+    # dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
+    sheet_var = sheet.col_values(9)
     for i in range(4, row):
-        if (sheet_var[i] > dataFrom) and (sheet_var[i] < dataTo):
+        if sheet_var[i] != "":
+            sheet_var[i] = datetime.strptime(sheet_var[i], '%d.%m.%Y')
+        else:
+            sheet_var[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
+    for i in range(4, row):
+        if (str(sheet_var[i]) > str(dataFrom)) and (str(sheet_var[i]) < str(dataTo)):
             if names[i].find('Adobe Photoshop') >= 0:
                 if danger_levels[i][0] == 'К':
                     danger_super += 1
@@ -128,8 +134,8 @@ def Clear(event): # Функция для очистки лейблов и по�
 
 
 def SaveDocx(event): # Функция для сохранения результатов в docx
-    document = Document()
-    document.add_heading('WORD', 0)
+    document = docx.Document()
+    document.add_heading('Adobe Photoshop', 0)
     document.add_heading('Количество уязвимостей по уровням опасности', level=1)
     table = document.add_table(rows=4, cols=3)
     hdr_cells = table.rows[0].cells
@@ -148,10 +154,10 @@ def SaveDocx(event): # Функция для сохранения результ
     hdr_cells3[0].text = '4'
     hdr_cells3[1].text = 'Критический'
     hdr_cells3[2].text = str(labelSuperOut['text'])
-    document.save('Анализ уязвимостей WORD.docx')
+    document.save('Анализ уязвимостей Adobe Photoshop.docx')
 
 
-buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysysWithDate" к кнопке "Анализ"
+buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
 buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
 radioButtonDateOff.bind('<Button-1>', dateOff)
 radioButtonDateOn.bind('<Button-1>', dateOn) #Привязка функции "dateOn" к радиокнопке "По дате"
