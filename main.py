@@ -1,13 +1,15 @@
 from tkinter import *
+import requests
 import docx
 import xlrd2
 from tkinter import messagebox
 from datetime import datetime
-from docx import Document
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 root = Tk() # Главное окно
 root.title("Welcome") # Название окна
-root.geometry("600x350") # Размер окна
+root.geometry("1200x700") # Размер окна
 root.configure(background='#f5f5f5') # Цвет заднего фона окна
 # Создание интерфейса
 radioButtonDateVar = BooleanVar() # Создание радиокнопок
@@ -18,6 +20,7 @@ radioButtonDateOff = Radiobutton(text="За все время", bg = '#FFFAFA', 
 buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
 buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Удалить", width=13, height=2)
 buttonSave = Button(root, bg='#008B8B', font='Times 12', text="Сохранить", width=13, height=2)
+buttonSaveEach = Button(root, bg='#008B8B', font='Times 12', text="Сохранить каждый", width=14, height=2)
 labelLow = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Низкий")
 labelLowOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
 labelMid = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Средний")
@@ -27,13 +30,34 @@ labelHighOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
 labelSuper = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Критический")
 labelSuperOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
 labelDate = Label(root, text="Введите необходимую дату:", state=DISABLED,
-                  bg='#FFFAFA',font='Times 13', fg='#000', width=30)
+                  bg='#FFFAFA', font='Times 13', fg='#000', width=30)
 labelFromDate = Label(root, text=" От:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
 labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
-labelDateInfo = Label(root, text="Анализ уязвимостей WORD", bg='#008080', font='Times 20', fg='#999', width=50)
+labelDateInfo = Label(root, text="Анализ уязвимостей Adobe Photoshop", bg='#008080',
+                      font='Times 20', fg='#999', width=50)
 labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
 textBoxFromDate = Entry(root, state=DISABLED, width=10)
 textBoxToDate = Entry(root, state=DISABLED, width=10)
+buttonDiagram = Button(root, bg='#7fc7ff', font='Times 12', text="Вывести диаграмму", height=2)
+buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить базу", width=13, height=2)
+inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
+inputEntry = Entry(root, text='Adobe Photoshop', width=20)
+inputEntry.insert(0, "Adobe Photoshop")
+
+
+def download(event):
+    files = open('vullist.xlsx', "wb")
+
+    url = 'https://bdu.fstec.ru/files/documents/vullist.xlsx'
+
+    headers = {
+    'User-Agent': 'My User Agent 1.0',
+    'From': 'youremail@domain.com'  # This is another valid field
+    }
+
+    response = requests.get(url, headers=headers)
+    files.write(response.content)
+    files.close()
 
 
 def dateOn(event): # Функция для радиокнопки "По дате", включает поля для ввода даты.
@@ -82,12 +106,12 @@ def AnalysisWithDate(event): # Функция для проверки прави
 
 
 def Analysis(event): # Функция поиска уязвимостей
-    workbook = xlrd2.open_workbook('D:/vullist(xls).xls')
+    workbook = xlrd2.open_workbook('D:/vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
 
     row = sheet.nrows  # определяем количество записей (строк) на листе
-    print('Всего записей', row)  # выведем количество записей на печать
+    print('Всего записей:', row)  # выведем количество записей на печать
 
     # выполним считывание списка данных из столбца с данными Название ПО
     names = sheet.col_values(4)  # (4-й столбец, нумерация с нуля)
@@ -96,9 +120,15 @@ def Analysis(event): # Функция поиска уязвимостей
     danger_lavels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
     chrb = radioButtonDateVar.get()
     ddd = sheet.col_values(9)
+    namesoftware = inputEntry.get()
+    search = 'Adobe Photoshop'
+
+    if namesoftware != 'Adobe Photoshop':
+        search = namesoftware
 
     global danger_low, danger_middle, danger_hight, danger_super
-    danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных уровней опасности
+    danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных
+                                                                        # уровней опасности
     if chrb == 0:  # Если радиокнопка По дате выключена (0)
         dataFrom = datetime.strptime('01.01.1900', '%d.%m.%Y')
         dataTo = datetime.strptime('17.06.3021', '%d.%m.%Y')
@@ -114,7 +144,8 @@ def Analysis(event): # Функция поиска уязвимостей
 
     for i in range(4, row):
         if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
-            if names[i].find('Adobe Photoshop') >= 0:  # если наименование ПО содержит искомое проверим по первой букве уровень уязвимости ПО
+            if names[i].find(search) >= 0:  # если наименование ПО содержит искомое проверим по первой
+                                                       # букве уровень уязвимости ПО
                 if danger_lavels[i][0] == 'К':  # Критический
                     danger_super += 1
                 elif danger_lavels[i][0] == 'В':  # Высокий
@@ -163,11 +194,70 @@ def SaveDocx(event): # Функция для сохранения результ
     document.save('Анализ уязвимостей Adobe Photoshop.docx')
 
 
+def SaveDocxEach(event):
+    list_var = ["низкому", "среднему", "высокому", "критическому"]
+    list_var_1 = ["низких", "средних", "высоких", "критических"]
+    list_var_2 = ["Низкий", "Средний", "Высокий", "Критический"]
+
+    for i in range(4):
+        document = docx.Document()
+        document.add_heading('Adobe Photoshop', 0)
+        document.add_heading('Количество уязвимостей по {} уровню опасности '.format(list_var[i]), level=1)
+        table = document.add_table(rows=1, cols=3)
+
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = '1'
+        hdr_cells[1].text = list_var_2[i]
+
+        if i == 0:
+            hdr_cells[2].text = str(labelLowOut['text'])
+        elif i == 1:
+            hdr_cells[2].text = str(labelMidOut['text'])
+        elif i == 2:
+            hdr_cells[2].text = str(labelHighOut['text'])
+        else:
+            hdr_cells[2].text = str(labelSuperOut['text'])
+
+        document.save('Анализ {} уязвимостей Adobe Photoshop.docx'.format(list_var_1[i]))
+
+
+def diagramma(event):
+    try:
+        print(danger_low)
+        labels = 'Низкий', 'Средний', 'Высокий', 'Критический'
+        sizes = [danger_low, danger_middle, danger_hight, danger_super]
+
+        colors = ("grey", "yellow", "orange", "brown")
+        fig1, ax1 = plt.subplots()
+        explode = (0, 0, 0.1, 0.15)
+
+        ax1.pie(sizes, colors=colors, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
+        patches, texts, auto = ax1.pie(sizes, colors=colors, shadow=True, startangle=90, explode=explode, autopct='%1.1f%%' )
+
+        plt.legend(patches, labels, loc="best")
+        root = Tk()
+        root.title("Диаграмма уязвимостей")
+        root.configure(background='#a8e4a0')
+        canvas = FigureCanvasTkAgg(fig1, master=root)
+        canvas.get_tk_widget().pack()
+        canvas.draw()
+    except NameError:
+        messagebox.showerror('Ошибка',
+                             'Для вывода диаграммы необходимо провести анализ!')
+
+
 buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
 buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
 radioButtonDateOff.bind('<Button-1>', dateOff)
 radioButtonDateOn.bind('<Button-1>', dateOn) #Привязка функции "dateOn" к радиокнопке "По дате"
 buttonSave.bind('<Button-1>', SaveDocx) #Привязка функции "SaveDocx" к кнопке "Сохранить в docx"
+buttonSaveEach.bind('<Button-1>', SaveDocxEach)
+buttonDiagram.bind('<Button-1>', diagramma)
+buttonobnow.bind('<Button-1>', download)
+#inputEntry.bind('<Button-1>', dd)
+
+buttonobnow.place(x=450, y=60)
+buttonDiagram.place(x=250, y=130)
 labelDate.place(x=120, y=40)
 labelDateInfo.pack()
 labelFromDate.place(x=130, y=80)
@@ -182,9 +272,12 @@ labelHigh.place(x=30, y=230)
 labelHighOut.place(x=180, y=240)
 labelSuper.place(x=30, y=280)
 labelSuperOut.place(x=180, y=290)
-buttonAnalysis.place(x=385, y=130) #Размещаем кнопки по координатам на плоскости окна
-buttonSave.place(x=385, y=200) #Размещаем кнопки по координатам на плоскости окна
-buttonClear.place(x=385, y=270) #Размещаем кнопки по координатам на плоскости окна
+buttonAnalysis.place(x=440, y=130) #Размещаем кнопки по координатам на плоскости окна
+buttonSave.place(x=440, y=200) #Размещаем кнопки по координатам на плоскости окна
+buttonSaveEach.place(x=580, y=200) #Размещаем кнопки по координатам на плоскости окна
+buttonClear.place(x=440, y=270) #Размещаем кнопки по координатам на плоскости окна
+inputLabel.place(x=100, y=105)
+inputEntry.place(x=270, y=105)
 radioButtonDateOn.pack(anchor=W)
 radioButtonDateOff.pack(anchor=W)
 root.mainloop()
