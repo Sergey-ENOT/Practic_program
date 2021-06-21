@@ -85,42 +85,48 @@ def Analysis(event): # Функция поиска уязвимостей
     workbook = xlrd2.open_workbook('D:/vullist(xls).xls')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
-    row = sheet.nrows            # количество строк
-    names = sheet.col_values(4)
-    danger_levels = sheet.col_values(12)
-    danger_super, danger_high, danger_middle, danger_low = 0, 0, 0, 0
-    #radio_condition_all = radioButtonDateVar.get()
-    radio_condition = radioButtonDateVar.get()
-    if radio_condition == 0: # Если радиокнопка "По дате" выключена (0)
+
+    row = sheet.nrows  # определяем количество записей (строк) на листе
+    print('Всего записей', row)  # выведем количество записей на печать
+
+    # выполним считывание списка данных из столбца с данными Название ПО
+    names = sheet.col_values(4)  # (4-й столбец, нумерация с нуля)
+    status = sheet.col_values(14)
+    # выполним считывание списка данных из столбца с данными Уровень опасности
+    danger_lavels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
+    chrb = radioButtonDateVar.get()
+    ddd = sheet.col_values(9)
+
+    global danger_low, danger_middle, danger_hight, danger_super
+    danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных уровней опасности
+    if chrb == 0:  # Если радиокнопка По дате выключена (0)
         dataFrom = datetime.strptime('01.01.1900', '%d.%m.%Y')
-        dataTo = datetime.strptime('01.01.2300', '%d.%m.%Y')
+        dataTo = datetime.strptime('17.06.3021', '%d.%m.%Y')
     else:
         dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
         dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
-        # dataFrom = textBoxFromDate.get()
-        # dataTo = textBoxToDate.get()
-    # dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
-    # dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
-    sheet_var = sheet.col_values(9)
-    for i in range(4, row):
-        if sheet_var[i] != "":
-            sheet_var[i] = datetime.strptime(sheet_var[i], '%d.%m.%Y')
+
+    for i in range(9, row):
+        if ddd[i] != '':
+            ddd[i] = datetime.strptime(ddd[i], '%d.%m.%Y')
         else:
-            sheet_var[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
+            ddd[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
+
     for i in range(4, row):
-        if (str(sheet_var[i]) > str(dataFrom)) and (str(sheet_var[i]) < str(dataTo)):
-            if names[i].find('Adobe Photoshop') >= 0:
-                if danger_levels[i][0] == 'К':
+        if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
+            if names[i].find('Adobe Photoshop') >= 0:  # если наименование ПО содержит искомое проверим по первой букве уровень уязвимости ПО
+                if danger_lavels[i][0] == 'К':  # Критический
                     danger_super += 1
-                elif danger_levels[i][0] == 'В':
-                    danger_high += 1
-                elif danger_levels[i][0] == 'С':
+                elif danger_lavels[i][0] == 'В':  # Высокий
+                    danger_hight += 1
+                elif danger_lavels[i][0] == 'С':  # Средний
                     danger_middle += 1
-                else:
+                else: # Низкий
                     danger_low += 1
+
     labelLowOut['text'] = danger_low
     labelMidOut['text'] = danger_middle
-    labelHighOut['text'] = danger_high
+    labelHighOut['text'] = danger_hight
     labelSuperOut['text'] = danger_super
 
 
