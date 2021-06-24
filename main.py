@@ -6,6 +6,7 @@ from tkinter import messagebox
 from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os.path
 
 root = Tk() # Главное окно
 root.title("Welcome") # Название окна
@@ -34,7 +35,7 @@ labelDate = Label(root, text="Введите необходимую дату:", 
 labelFromDate = Label(root, text=" От:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
 labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
 labelDateInfo = Label(root, text="Анализ уязвимостей Adobe Photoshop", bg='#008080',
-                      font='Times 20', fg='#999', width=50)
+                      font='Times 20', fg='#999', width=80)
 labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
 textBoxFromDate = Entry(root, state=DISABLED, width=10)
 textBoxToDate = Entry(root, state=DISABLED, width=10)
@@ -43,6 +44,16 @@ buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить
 inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
 inputEntry = Entry(root, text='Adobe Photoshop', width=20)
 inputEntry.insert(0, "Adobe Photoshop")
+operation_label = Label(root, background="#ffbb00", text="Статус операции:", width=15)
+operation_status_label = Label(root, background="#ffbb00", text="", width=15)
+
+
+def Status_process(event):
+    operation_status_label['text'] = event
+
+
+def Status_executed(event):
+    operation_status_label['text'] = event
 
 
 def download(event):
@@ -51,13 +62,14 @@ def download(event):
     url = 'https://bdu.fstec.ru/files/documents/vullist.xlsx'
 
     headers = {
-    'User-Agent': 'My User Agent 1.0',
-    'From': 'youremail@domain.com'  # This is another valid field
+        'User-Agent': 'My User Agent 1.0',
+        'From': 'youremail@domain.com'  # This is another valid field
     }
 
     response = requests.get(url, headers=headers)
     files.write(response.content)
     files.close()
+    Status_executed("Выполнено")
 
 
 def dateOn(event): # Функция для радиокнопки "По дате", включает поля для ввода даты.
@@ -106,7 +118,7 @@ def AnalysisWithDate(event): # Функция для проверки прави
 
 
 def Analysis(event): # Функция поиска уязвимостей
-    workbook = xlrd2.open_workbook('D:/vullist.xlsx')
+    workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
 
@@ -120,11 +132,7 @@ def Analysis(event): # Функция поиска уязвимостей
     danger_lavels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
     chrb = radioButtonDateVar.get()
     ddd = sheet.col_values(9)
-    namesoftware = inputEntry.get()
-    search = 'Adobe Photoshop'
-
-    if namesoftware != 'Adobe Photoshop':
-        search = namesoftware
+    name_software = inputEntry.get()
 
     global danger_low, danger_middle, danger_hight, danger_super
     danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных
@@ -144,7 +152,7 @@ def Analysis(event): # Функция поиска уязвимостей
 
     for i in range(4, row):
         if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
-            if names[i].find(search) >= 0:  # если наименование ПО содержит искомое проверим по первой
+            if names[i].find(name_software) >= 0:  # если наименование ПО содержит искомое проверим по первой
                                                        # букве уровень уязвимости ПО
                 if danger_lavels[i][0] == 'К':  # Критический
                     danger_super += 1
@@ -166,32 +174,36 @@ def Clear(event): # Функция для очистки лейблов и по�
     labelMidOut['text'] = ""
     labelHighOut['text'] = ""
     labelSuperOut['text'] = ""
+    operation_status_label['text'] = ""
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
 
 
 def SaveDocx(event): # Функция для сохранения результатов в docx
-    document = docx.Document()
-    document.add_heading('Adobe Photoshop', 0)
-    document.add_heading('Количество уязвимостей по уровням опасности', level=1)
-    table = document.add_table(rows=4, cols=3)
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = '1'
-    hdr_cells[1].text = 'Низкий'
-    hdr_cells[2].text = str(labelLowOut['text'])
-    hdr_cells1 = table.rows[1].cells
-    hdr_cells1[0].text = '2'
-    hdr_cells1[1].text = 'Средний'
-    hdr_cells1[2].text = str(labelMidOut['text'])
-    hdr_cells2 = table.rows[2].cells
-    hdr_cells2[0].text = '3'
-    hdr_cells2[1].text = 'Высокий'
-    hdr_cells2[2].text = str(labelHighOut['text'])
-    hdr_cells3 = table.rows[3].cells
-    hdr_cells3[0].text = '4'
-    hdr_cells3[1].text = 'Критический'
-    hdr_cells3[2].text = str(labelSuperOut['text'])
-    document.save('Анализ уязвимостей Adobe Photoshop.docx')
+    if (labelLowOut['text'] and labelMidOut['text'] and labelHighOut['text'] and labelSuperOut['text']) == "":
+        messagebox.showerror("Error", "Сначала нужно провести анализ данных!")
+    else:
+        document = docx.Document()
+        document.add_heading('Adobe Photoshop', 0)
+        document.add_heading('Количество уязвимостей по уровням опасности', level=1)
+        table = document.add_table(rows=4, cols=3)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = '1'
+        hdr_cells[1].text = 'Низкий'
+        hdr_cells[2].text = str(labelLowOut['text'])
+        hdr_cells1 = table.rows[1].cells
+        hdr_cells1[0].text = '2'
+        hdr_cells1[1].text = 'Средний'
+        hdr_cells1[2].text = str(labelMidOut['text'])
+        hdr_cells2 = table.rows[2].cells
+        hdr_cells2[0].text = '3'
+        hdr_cells2[1].text = 'Высокий'
+        hdr_cells2[2].text = str(labelHighOut['text'])
+        hdr_cells3 = table.rows[3].cells
+        hdr_cells3[0].text = '4'
+        hdr_cells3[1].text = 'Критический'
+        hdr_cells3[2].text = str(labelSuperOut['text'])
+        document.save('Анализ уязвимостей Adobe Photoshop.docx')
 
 
 def SaveDocxEach(event):
@@ -235,15 +247,14 @@ def diagramma(event):
         patches, texts, auto = ax1.pie(sizes, colors=colors, shadow=True, startangle=90, explode=explode, autopct='%1.1f%%' )
 
         plt.legend(patches, labels, loc="best")
-        root = Tk()
-        root.title("Диаграмма уязвимостей")
-        root.configure(background='#a8e4a0')
-        canvas = FigureCanvasTkAgg(fig1, master=root)
+        window = Tk()
+        window.title("Диаграмма уязвимостей")
+        window.configure(background='#a8e4a0')
+        canvas = FigureCanvasTkAgg(fig1, master=window)
         canvas.get_tk_widget().pack()
         canvas.draw()
     except NameError:
-        messagebox.showerror('Ошибка',
-                             'Для вывода диаграммы необходимо провести анализ!')
+        messagebox.showerror("Error", "Для вывода диаграммы необходимо провести анализ!")
 
 
 buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
@@ -280,4 +291,8 @@ inputLabel.place(x=100, y=105)
 inputEntry.place(x=270, y=105)
 radioButtonDateOn.pack(anchor=W)
 radioButtonDateOff.pack(anchor=W)
+operation_label.place(x=600, y=63)
+operation_status_label.place(x=600, y=87)
+#print(os.path.exists('vullist.xlsx'))
+print("Круг программы выполнен")
 root.mainloop()
