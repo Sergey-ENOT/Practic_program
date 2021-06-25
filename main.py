@@ -46,11 +46,10 @@ buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить
 inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
 inputEntry = Entry(root, text='Adobe Photoshop', width=20)
 inputEntry.insert(0, "Adobe Photoshop")
-operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус операции:", width=15)
-operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="Выполняется", width=15)
-save_status_label = Label(root, background="#e8594f", state=DISABLED, text="Статус операции", width=15)
-operation_save_status_label = Label(root, background="#ffbb00", state=DISABLED, text="Выполняется", width=15)
-# image_button = Button(root, text="?", width=15)
+operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус обновления:", width=16)
+operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
+analysis_status_label = Label(root, background="#d9a925", state=DISABLED, text="Статус анализа:", width=16)
+operation_analysis_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
 
 
 def Status_executed(event):
@@ -58,10 +57,11 @@ def Status_executed(event):
 
 
 def download(event):
-    operation_label['state'] = NORMAL
-    operation_status_label['background'] = "#ffbb00"
-    operation_status_label['state'] = NORMAL
+    operation_label.configure(state=NORMAL)
     operation_status_label['text'] = "Выполняется"
+    operation_status_label.configure(state=NORMAL)
+    messagebox.showinfo("Info", "Подтвердите обновление базы данных")
+
     files = open('vullist.xlsx', "wb")
 
     url = 'https://bdu.fstec.ru/files/documents/vullist.xlsx'
@@ -75,7 +75,8 @@ def download(event):
     files.write(response.content)
     files.close()
     #Status_executed(event)
-    operation_status_label['text'] = "Выполнено"
+    operation_status_label.configure(text="Выполнено")
+    messagebox.showinfo("Info", "Обновление базы данных выполнено")
 
 
 def dateOn(event): # Функция для радиокнопки "По дате", включает поля для ввода даты.
@@ -122,61 +123,66 @@ def AnalysisWithDate(event): # Функция для проверки прави
 
 
 def Analysis(event): # Функция поиска уязвимостей
-    save_status_label['background'] = "#ffbb00"
-    save_status_label['state'] = NORMAL
-    operation_save_status_label['background'] = "#ffbb00"
-    operation_save_status_label['state'] = NORMAL
-    operation_save_status_label['text'] = "Выполняется"
+    analysis_status_label['state'] = NORMAL
+    operation_analysis_status_label['text'] = "Выполняется"
+    operation_analysis_status_label['state'] = NORMAL
+    messagebox.showinfo("Info", "Подтвердите начало анализа базы данных")
+    print("some new text")
     workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
 
     row = sheet.nrows  # определяем количество записей (строк) на листе
-    print('Всего записей:', row)  # выведем количество записей на печать
-
-    # выполним считывание списка данных из столбца с данными Название ПО
-    names = sheet.col_values(4)  # (4-й столбец, нумерация с нуля)
-    status = sheet.col_values(14)
-    # выполним считывание списка данных из столбца с данными Уровень опасности
-    danger_lavels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
-    chrb = radioButtonDateVar.get()
-    ddd = sheet.col_values(9)
-    name_software = inputEntry.get()
-
-    global danger_low, danger_middle, danger_hight, danger_super
-    danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных
-                                                                        # уровней опасности
-    if chrb == 0:  # Если радиокнопка По дате выключена (0)
-        dataFrom = datetime.strptime('01.01.1900', '%d.%m.%Y')
-        dataTo = datetime.strptime('17.06.3021', '%d.%m.%Y')
+    if row == 0:
+        messagebox.showerror("Error", "Необходимо обновить базу данных")
     else:
-        dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
-        dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
+        print('Всего записей:', row)  # выведем количество записей на печать
 
-    for i in range(9, row):
-        if ddd[i] != '':
-            ddd[i] = datetime.strptime(ddd[i], '%d.%m.%Y')
+        # выполним считывание списка данных из столбца с данными Название ПО
+        names = sheet.col_values(4)  # (4-й столбец, нумерация с нуля)
+        status = sheet.col_values(14)
+        # выполним считывание списка данных из столбца с данными Уровень опасности
+        danger_lavels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
+        chrb = radioButtonDateVar.get()
+        ddd = sheet.col_values(9)
+        global name_software
+        name_software = inputEntry.get()
+
+        global danger_low, danger_middle, danger_hight, danger_super
+        danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных
+                                                                            # уровней опасности
+        if chrb == 0:  # Если радиокнопка По дате выключена (0)
+            dataFrom = datetime.strptime('01.01.1900', '%d.%m.%Y')
+            dataTo = datetime.strptime('17.06.3021', '%d.%m.%Y')
         else:
-            ddd[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
+            dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
+            dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
 
-    for i in range(4, row):
-        if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
-            if names[i].find(name_software) >= 0:  # если наименование ПО содержит искомое проверим по первой
-                                                       # букве уровень уязвимости ПО
-                if danger_lavels[i][0] == 'К':  # Критический
-                    danger_super += 1
-                elif danger_lavels[i][0] == 'В':  # Высокий
-                    danger_hight += 1
-                elif danger_lavels[i][0] == 'С':  # Средний
-                    danger_middle += 1
-                else: # Низкий
-                    danger_low += 1
+        for i in range(9, row):
+            if ddd[i] != '':
+                ddd[i] = datetime.strptime(ddd[i], '%d.%m.%Y')
+            else:
+                ddd[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
 
-    labelLowOut['text'] = danger_low
-    labelMidOut['text'] = danger_middle
-    labelHighOut['text'] = danger_hight
-    labelSuperOut['text'] = danger_super
-    operation_save_status_label['text'] = "Выполнено"
+        for i in range(4, row):
+            if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
+                if names[i].find(name_software) >= 0:  # если наименование ПО содержит искомое проверим по первой
+                                                           # букве уровень уязвимости ПО
+                    if danger_lavels[i][0] == 'К':  # Критический
+                        danger_super += 1
+                    elif danger_lavels[i][0] == 'В':  # Высокий
+                        danger_hight += 1
+                    elif danger_lavels[i][0] == 'С':  # Средний
+                        danger_middle += 1
+                    else: # Низкий
+                        danger_low += 1
+
+        labelLowOut['text'] = danger_low
+        labelMidOut['text'] = danger_middle
+        labelHighOut['text'] = danger_hight
+        labelSuperOut['text'] = danger_super
+        operation_analysis_status_label['text'] = "Выполнено"
+        messagebox.showinfo("Info ", "Анализ базы данных завершён")
 
 
 def Clear(event): # Функция для очистки лейблов и полей
@@ -185,6 +191,7 @@ def Clear(event): # Функция для очистки лейблов и по�
     labelHighOut['text'] = ""
     labelSuperOut['text'] = ""
     operation_status_label['text'] = ""
+    operation_analysis_status_label['text'] = ""
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
 
@@ -194,7 +201,7 @@ def SaveDocx(event): # Функция для сохранения результ
         messagebox.showerror("Error", "Сначала нужно провести анализ данных!")
     else:
         document = docx.Document()
-        document.add_heading('Adobe Photoshop', 0)
+        document.add_heading(name_software, 0)
         document.add_heading('Количество уязвимостей по уровням опасности', level=1)
         table = document.add_table(rows=4, cols=3)
         hdr_cells = table.rows[0].cells
@@ -213,7 +220,7 @@ def SaveDocx(event): # Функция для сохранения результ
         hdr_cells3[0].text = '4'
         hdr_cells3[1].text = 'Критический'
         hdr_cells3[2].text = str(labelSuperOut['text'])
-        document.save('Анализ уязвимостей Adobe Photoshop.docx')
+        document.save('Анализ уязвимостей {}.docx'.format(name_software))
 
 
 def SaveDocxEach(event):
@@ -223,7 +230,7 @@ def SaveDocxEach(event):
 
     for i in range(4):
         document = docx.Document()
-        document.add_heading('Adobe Photoshop', 0)
+        document.add_heading(name_software, 0)
         document.add_heading('Количество уязвимостей по {} уровню опасности '.format(list_var[i]), level=1)
         table = document.add_table(rows=1, cols=3)
 
@@ -240,7 +247,7 @@ def SaveDocxEach(event):
         else:
             hdr_cells[2].text = str(labelSuperOut['text'])
 
-        document.save('Анализ {} уязвимостей Adobe Photoshop.docx'.format(list_var_1[i]))
+        document.save('Анализ {} уязвимостей {}.docx'.format(list_var_1[i], name_software))
 
 
 def diagramma(event):
@@ -267,15 +274,14 @@ def diagramma(event):
         messagebox.showerror("Error", "Для вывода диаграммы необходимо провести анализ!")
 
 
-# def show_image(event):
-#     image_window = Tk()
-#     image_window.title("cat_window")
-#     image_window.geometry("500x500")
-#
-#     bg = PhotoImage(file="D:/Atom-js/images/cat_image.png")  # pngegg.png
-#     my_label = Label(image_window, image=bg)
-#     my_label.place(x=0, y=0, relwidth=1, relheight=1)
-#     print("ssdsgsrssgdh")
+def show_image(event):
+    image_window = Tk()
+    image_window.title("cat_window")
+    image_window.geometry("500x500")
+    bg = PhotoImage(file="cat_image.png")  # pngegg.png
+    my_label = Label(image_window, image=bg)
+    my_label.place(x=0, y=0, relwidth=1, relheight=1)
+    print("ssdsgsrssgdh")
 
 
 buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
@@ -286,7 +292,9 @@ buttonSave.bind('<Button-1>', SaveDocx) #Привязка функции "SaveDo
 buttonSaveEach.bind('<Button-1>', SaveDocxEach)
 buttonDiagram.bind('<Button-1>', diagramma)
 buttonobnow.bind('<Button-1>', download)
-# image_button.bind('<Button-1>', show_image)
+
+image_button = Button(root, text="?", width=15)
+image_button.bind('<Button-1>', show_image)
 #inputEntry.bind('<Button-1>', dd)
 
 buttonobnow.place(x=441, y=60)
@@ -315,9 +323,9 @@ radioButtonDateOn.pack(anchor=W)
 radioButtonDateOff.pack(anchor=W)
 operation_label.place(x=600, y=63)
 operation_status_label.place(x=600, y=87)
-save_status_label.place(x=600, y=133)
-operation_save_status_label.place(x=600, y=157)
-# image_button.place(x=1000, y=600)
+analysis_status_label.place(x=600, y=133)
+operation_analysis_status_label.place(x=600, y=157)
+image_button.place(x=1000, y=600)
 #print(os.path.exists('vullist.xlsx'))
 print("Круг программы выполнен")
 root.mainloop()
