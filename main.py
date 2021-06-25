@@ -6,6 +6,7 @@ from tkinter import messagebox
 from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from PIL import ImageTk, Image
 import time
 import os.path
 
@@ -16,8 +17,8 @@ root.configure(background='#f5f5f5') # Цвет заднего фона окна
 # Создание интерфейса
 radioButtonDateVar = BooleanVar() # Создание радиокнопок
 radioButtonDateVar.set(0)
-radioButtonDateOn = Radiobutton(text="По дате", bg='#FFFAFA', variable=radioButtonDateVar, value=1)
-radioButtonDateOff = Radiobutton(text="За все время", bg='#FFFAFA', variable=radioButtonDateVar, value=0)
+radioButtonDateOn = Radiobutton(root, text="По дате", bg='#FFFAFA', variable=radioButtonDateVar, value=1)
+radioButtonDateOff = Radiobutton(root, text="За все время", bg='#FFFAFA', variable=radioButtonDateVar, value=0)
 # Создание кнопок, полей, лейблов
 buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
 buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Удалить", width=13, height=2)
@@ -49,6 +50,7 @@ operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Ста
 operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="Выполняется", width=15)
 save_status_label = Label(root, background="#e8594f", state=DISABLED, text="Статус операции", width=15)
 operation_save_status_label = Label(root, background="#ffbb00", state=DISABLED, text="Выполняется", width=15)
+# image_button = Button(root, text="?", width=15)
 
 
 def Status_executed(event):
@@ -265,6 +267,17 @@ def diagramma(event):
         messagebox.showerror("Error", "Для вывода диаграммы необходимо провести анализ!")
 
 
+# def show_image(event):
+#     image_window = Tk()
+#     image_window.title("cat_window")
+#     image_window.geometry("500x500")
+#
+#     bg = PhotoImage(file="D:/Atom-js/images/cat_image.png")  # pngegg.png
+#     my_label = Label(image_window, image=bg)
+#     my_label.place(x=0, y=0, relwidth=1, relheight=1)
+#     print("ssdsgsrssgdh")
+
+
 buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
 buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
 radioButtonDateOff.bind('<Button-1>', dateOff)
@@ -273,6 +286,7 @@ buttonSave.bind('<Button-1>', SaveDocx) #Привязка функции "SaveDo
 buttonSaveEach.bind('<Button-1>', SaveDocxEach)
 buttonDiagram.bind('<Button-1>', diagramma)
 buttonobnow.bind('<Button-1>', download)
+# image_button.bind('<Button-1>', show_image)
 #inputEntry.bind('<Button-1>', dd)
 
 buttonobnow.place(x=441, y=60)
@@ -303,6 +317,7 @@ operation_label.place(x=600, y=63)
 operation_status_label.place(x=600, y=87)
 save_status_label.place(x=600, y=133)
 operation_save_status_label.place(x=600, y=157)
+# image_button.place(x=1000, y=600)
 #print(os.path.exists('vullist.xlsx'))
 print("Круг программы выполнен")
 root.mainloop()
