@@ -6,6 +6,7 @@ from tkinter import messagebox
 from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import time
 import os.path
 
 root = Tk() # Главное окно
@@ -16,7 +17,7 @@ root.configure(background='#f5f5f5') # Цвет заднего фона окна
 radioButtonDateVar = BooleanVar() # Создание радиокнопок
 radioButtonDateVar.set(0)
 radioButtonDateOn = Radiobutton(text="По дате", bg='#FFFAFA', variable=radioButtonDateVar, value=1)
-radioButtonDateOff = Radiobutton(text="За все время", bg = '#FFFAFA', variable=radioButtonDateVar, value=0)
+radioButtonDateOff = Radiobutton(text="За все время", bg='#FFFAFA', variable=radioButtonDateVar, value=0)
 # Создание кнопок, полей, лейблов
 buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
 buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Удалить", width=13, height=2)
@@ -44,19 +45,21 @@ buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить
 inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
 inputEntry = Entry(root, text='Adobe Photoshop', width=20)
 inputEntry.insert(0, "Adobe Photoshop")
-operation_label = Label(root, background="#ffbb00", text="Статус операции:", width=15)
-operation_status_label = Label(root, background="#ffbb00", text="", width=15)
-
-
-def Status_process(event):
-    operation_status_label['text'] = event
+operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус операции:", width=15)
+operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="Выполняется", width=15)
+save_status_label = Label(root, background="#e8594f", state=DISABLED, text="Статус операции", width=15)
+operation_save_status_label = Label(root, background="#ffbb00", state=DISABLED, text="Выполняется", width=15)
 
 
 def Status_executed(event):
-    operation_status_label['text'] = event
+    operation_status_label['text'] = "Выполнено"
 
 
 def download(event):
+    operation_label['state'] = NORMAL
+    operation_status_label['background'] = "#ffbb00"
+    operation_status_label['state'] = NORMAL
+    operation_status_label['text'] = "Выполняется"
     files = open('vullist.xlsx', "wb")
 
     url = 'https://bdu.fstec.ru/files/documents/vullist.xlsx'
@@ -69,7 +72,8 @@ def download(event):
     response = requests.get(url, headers=headers)
     files.write(response.content)
     files.close()
-    Status_executed("Выполнено")
+    #Status_executed(event)
+    operation_status_label['text'] = "Выполнено"
 
 
 def dateOn(event): # Функция для радиокнопки "По дате", включает поля для ввода даты.
@@ -96,8 +100,6 @@ def AnalysisWithDate(event): # Функция для проверки прави
     if radio_condition == 1: # Если радиокнопка "По дате" включена (1)
         dataFrom = textBoxFromDate.get()
         dataTo = textBoxToDate.get()
-        #dataFrom = '12.12.2010'
-        #dataTo = '12.12.2015'
         if len(dataFrom and dataTo) == 10 and (dataFrom[2] and dataTo[2]) == '.' and \
                 (dataFrom[5] and dataTo[5]) == '.' and dataFrom[6:].isnumeric() and dataTo[6:].isnumeric() and \
                 dataFrom[:2].isnumeric() and dataTo[:2].isnumeric() and dataFrom[3:5].isnumeric() and \
@@ -118,6 +120,11 @@ def AnalysisWithDate(event): # Функция для проверки прави
 
 
 def Analysis(event): # Функция поиска уязвимостей
+    save_status_label['background'] = "#ffbb00"
+    save_status_label['state'] = NORMAL
+    operation_save_status_label['background'] = "#ffbb00"
+    operation_save_status_label['state'] = NORMAL
+    operation_save_status_label['text'] = "Выполняется"
     workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
@@ -167,6 +174,7 @@ def Analysis(event): # Функция поиска уязвимостей
     labelMidOut['text'] = danger_middle
     labelHighOut['text'] = danger_hight
     labelSuperOut['text'] = danger_super
+    operation_save_status_label['text'] = "Выполнено"
 
 
 def Clear(event): # Функция для очистки лейблов и полей
@@ -267,7 +275,7 @@ buttonDiagram.bind('<Button-1>', diagramma)
 buttonobnow.bind('<Button-1>', download)
 #inputEntry.bind('<Button-1>', dd)
 
-buttonobnow.place(x=450, y=60)
+buttonobnow.place(x=441, y=60)
 buttonDiagram.place(x=250, y=130)
 labelDate.place(x=120, y=40)
 labelDateInfo.pack()
@@ -293,6 +301,8 @@ radioButtonDateOn.pack(anchor=W)
 radioButtonDateOff.pack(anchor=W)
 operation_label.place(x=600, y=63)
 operation_status_label.place(x=600, y=87)
+save_status_label.place(x=600, y=133)
+operation_save_status_label.place(x=600, y=157)
 #print(os.path.exists('vullist.xlsx'))
 print("Круг программы выполнен")
 root.mainloop()
