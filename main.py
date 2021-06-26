@@ -10,13 +10,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 root = Tk() # Главное окно
 root.title("Welcome") # Название окна
 root.geometry("1200x700") # Размер окна
-root.configure(background='#f5f5f5') # Цвет заднего фона окна
+root.configure(background='#0a3b4f') # Цвет заднего фона окна
 labelDateInfo = Label(root, text="Анализ уязвимостей Adobe Photoshop", bg='#008080',
-                      font='Times 20', fg='#999', width=80)
-
-
-def Status_executed(event):
-    operation_status_label['text'] = "Выполнено"
+                      font='Times 20', fg='#613e3d', width=80)
 
 
 def Download(event):
@@ -37,27 +33,26 @@ def Download(event):
     response = requests.get(url, headers=headers)
     files.write(response.content)
     files.close()
-    #Status_executed(event)
     operation_status_label.configure(text="Выполнено")
     messagebox.showinfo("Info", "Обновление базы данных выполнено")
 
 
 def dateOn(event): # Функция для радиокнопки "По дате", включает поля для ввода даты.
-    labelDateInfo.configure(state=NORMAL)
     textBoxFromDate.configure(state=NORMAL)
     textBoxToDate.configure(state=NORMAL)
     labelFromDate.configure(state=NORMAL)
     labelToDate.configure(state=NORMAL)
+    labelDate.configure(state=NORMAL)
 
 
 def dateOff(event): # Функция для радиокнопки "Без даты", выключает и очищает поля для ввода даты.
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
-    labelDateInfo.configure(state=DISABLED)
     textBoxFromDate.configure(state=DISABLED)
     textBoxToDate.configure(state=DISABLED)
     labelFromDate.configure(state=DISABLED)
     labelToDate.configure(state=DISABLED)
+    labelDate.configure(state=DISABLED)
 
 
 def AnalysisWithDate(event): # Функция для проверки правильности ввода даты
@@ -72,15 +67,15 @@ def AnalysisWithDate(event): # Функция для проверки прави
                 dataTo[3:5].isnumeric():
             tsFrom = datetime(year=int(dataFrom[6:]), month=int(dataFrom[3:5]), day=int(dataFrom[:2]))
             tsTo = datetime(year=int(dataFrom[6:]), month=int(dataFrom[3:5]), day=int(dataFrom[:2]))
-            if (tsFrom.date and tsTo.day) > 0 and (tsFrom.day and tsTo.day) < 32 and \
-                (tsFrom.month and tsTo.month) > 0 and \
-                (tsFrom.month and tsTo.month) < 13 and \
-                (tsFrom.year and tsTo.year) > 1900:
+            if (tsFrom.date and tsTo.day) > 0 and (tsFrom.day and tsTo.day) < 32 and (tsFrom.month and tsTo.month) > 0 \
+                    and (tsFrom.month and tsTo.month) < 13 and (tsFrom.year and tsTo.year) > 1900:
                 Analysis(event)
             else:
-                messagebox.showerror('Ошибка', 'Некорректно введена дата') # Если дата введена некорректно - выводим окно с ошибкой
+                messagebox.showerror('Ошибка', 'Некорректно введена дата') # Если дата введена некорректно -
+                                                                           # выводим окно с ошибкой
         else:
-            messagebox.showerror('Ошибка', 'Некорректно введена дата') # Если дата введена некорректно - выводим окно с ошибкой
+            messagebox.showerror('Ошибка', 'Некорректно введена дата')  # Если дата введена некорректно -
+                                                                        # выводим окно с ошибкой
     else:
         Analysis(event) # Выполняем функцию Analysis
 
@@ -89,10 +84,10 @@ def Analysis(event): # Функция поиска уязвимостей
     analysis_status_label['state'] = NORMAL
     operation_analysis_status_label['text'] = "Выполняется"
     operation_analysis_status_label['state'] = NORMAL
+    analysis_result.configure(background='#e6dd43', foreground='#29281d')
     root.update_idletasks()
     workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
-    cell = workbook.sheet_by_index(0)
 
     row = sheet.nrows  # определяем количество записей (строк) на листе
     if row == 0:
@@ -102,17 +97,16 @@ def Analysis(event): # Функция поиска уязвимостей
 
         # выполним считывание списка данных из столбца с данными Название ПО
         names = sheet.col_values(4)  # (4-й столбец, нумерация с нуля)
-        status = sheet.col_values(14)
         # выполним считывание списка данных из столбца с данными Уровень опасности
-        danger_lavels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
+        danger_levels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
         chrb = radioButtonDateVar.get()
         ddd = sheet.col_values(9)
         global name_software
         name_software = inputEntry.get()
 
         global danger_low, danger_middle, danger_hight, danger_super
-        danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики различных
-                                                                            # уровней опасности
+        danger_super, danger_hight, danger_middle, danger_low = 0, 0, 0, 0  # инициализируем переменные-счетчики
+                                                                            # различных уровней опасности
         if chrb == 0:  # Если радиокнопка По дате выключена (0)
             dataFrom = datetime.strptime('01.01.1900', '%d.%m.%Y')
             dataTo = datetime.strptime('17.06.3021', '%d.%m.%Y')
@@ -130,11 +124,11 @@ def Analysis(event): # Функция поиска уязвимостей
             if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
                 if names[i].find(name_software) >= 0:  # если наименование ПО содержит искомое проверим по первой
                                                            # букве уровень уязвимости ПО
-                    if danger_lavels[i][0] == 'К':  # Критический
+                    if danger_levels[i][0] == 'К':  # Критический
                         danger_super += 1
-                    elif danger_lavels[i][0] == 'В':  # Высокий
+                    elif danger_levels[i][0] == 'В':  # Высокий
                         danger_hight += 1
-                    elif danger_lavels[i][0] == 'С':  # Средний
+                    elif danger_levels[i][0] == 'С':  # Средний
                         danger_middle += 1
                     else: # Низкий
                         danger_low += 1
@@ -156,6 +150,7 @@ def Clear(event): # Функция для очистки лейблов и по�
     operation_analysis_status_label['text'] = ""
     operation_status_label['state'] = DISABLED
     analysis_status_label['state'] = DISABLED
+    analysis_result.configure(background='#0a3b4f', foreground='#0a3b4f')
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
 
@@ -214,10 +209,10 @@ def SaveDocxEach(event):
 
             document.save('Анализ {} уязвимостей {}.docx'.format(list_var_1[i], name_software))
     except NameError:
-        messagebox.showerror("Error", "Сначал нужно провести анализ данных!")
+        messagebox.showerror("Error", "Сначала нужно провести анализ данных!")
 
 
-def diagramma(event):
+def diagram(event):
     try:
         labels = ["Низкий", "Средний", "Высокий", "Критический"]
         sizes = [danger_low, danger_middle, danger_hight, danger_super]
@@ -239,107 +234,112 @@ def diagramma(event):
 
 
 # Создание интерфейса
+# Создание кнопок, полей, лейблов, их бинд и расположение
 labelDateInfo.pack()
 
 radioButtonDateVar = BooleanVar() # Создание радиокнопок
 radioButtonDateVar.set(0)
 
-radioButtonDateOn = Radiobutton(root, text="По дате", bg='#FFFAFA', variable=radioButtonDateVar, value=1)
+radioButtonDateOn = Radiobutton(root, text="По дате", bg='#447185', variable=radioButtonDateVar, value=1)
 radioButtonDateOn.bind('<Button-1>', dateOn) #Привязка функции "dateOn" к радиокнопке "По дате"
 
-radioButtonDateOff = Radiobutton(root, text="За все время", bg='#FFFAFA', variable=radioButtonDateVar, value=0)
+radioButtonDateOff = Radiobutton(root, text="За все время", bg='#447185', variable=radioButtonDateVar, value=0)
 radioButtonDateOff.bind('<Button-1>', dateOff)
 
-radioButtonDateOff.pack(anchor=W)
-radioButtonDateOn.pack(anchor=W)
+radioButtonDateOff.place(x=0, y=37)
+radioButtonDateOn.place(x=0, y=72)
 
-# Создание кнопок, полей, лейблов
-
+analysis_result = Label(root, font='Times 14', background='#0a3b4f', foreground='#0a3b4f',
+                        text="Результаты анализа данных:", width=30)
+analysis_result.place(x=126, y=300)
 
 buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
 buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
-buttonAnalysis.place(x=440, y=130) #Размещаем кнопки по координатам на плоскости окна
+buttonAnalysis.place(x=600, y=130) #Размещаем кнопки по координатам на плоскости окна
 
-buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Удалить", width=13, height=2)
+buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить базу", width=13, height=2)
+buttonobnow.bind('<Button-1>', Download)
+buttonobnow.place(x=600, y=60)
+
+buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Очистить поля", width=13, height=2)
 buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
-buttonClear.place(x=440, y=270) #Размещаем кнопки по координатам на плоскости окна
+buttonClear.place(x=1000, y=600) #Размещаем кнопки по координатам на плоскости окна
 
-buttonSave = Button(root, bg='#008B8B', font='Times 12', text="Сохранить", width=13, height=2)
+buttonSave = Button(root, bg='#008B8B', font='Times 12', text="Сохранить всё \n в один", width=13, height=2)
 buttonSave.bind('<Button-1>', SaveDocx)  #Привязка функции "SaveDocx" к кнопке "Сохранить в docx"
-buttonSave.place(x=440, y=200) #Размещаем кнопки по координатам на плоскости окна
+buttonSave.place(x=900, y=100) #Размещаем кнопки по координатам на плоскости окна
 
-buttonSaveEach = Button(root, bg='#008B8B', font='Times 12', text="Сохранить каждый", width=14, height=2)
+buttonSaveEach = Button(root, bg='#008B8B', font='Times 12', text="Сохранить каждый \n отдельно", width=14, height=2)
 buttonSaveEach.bind('<Button-1>', SaveDocxEach)
-buttonSaveEach.place(x=580, y=200) #Размещаем кнопки по координатам на плоскости окна
+buttonSaveEach.place(x=1045, y=100) #Размещаем кнопки по координатам на плоскости окна
 
 labelLow = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Низкий")
-labelLow.place(x=30, y=130)
+labelLow.place(x=15, y=350)
 
 labelLowOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelLowOut.place(x=180, y=140)
+labelLowOut.place(x=48, y=405)
 
 labelMid = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Средний")
-labelMid.place(x=30, y=180)
+labelMid.place(x=150, y=350)
 
 labelMidOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelMidOut.place(x=180, y=190)
+labelMidOut.place(x=181, y=405)
 
 labelHigh = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Высокий")
-labelHigh.place(x=30, y=230)
+labelHigh.place(x=285, y=350)
 
 labelHighOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelHighOut.place(x=180, y=240)
+labelHighOut.place(x=317, y=405)
 
 labelSuper = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Критический")
-labelSuper.place(x=30, y=280)
+labelSuper.place(x=420, y=350)
 
 labelSuperOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelSuperOut.place(x=180, y=290)
+labelSuperOut.place(x=451, y=405)
 
 labelDate = Label(root, text="Введите необходимую дату:", state=DISABLED,
                   bg='#FFFAFA', font='Times 13', fg='#000', width=30)
-labelDate.place(x=120, y=40)
+labelDate.place(x=115, y=75)
 
 labelFromDate = Label(root, text=" От:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
-labelFromDate.place(x=130, y=80)
+labelFromDate.place(x=120, y=115)
 
 labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
-labelToDate.place(x=275, y=80)
+labelToDate.place(x=265, y=115)
 
 labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
 
 textBoxFromDate = Entry(root, state=DISABLED, width=10)
-textBoxFromDate.place(x=180, y=80)
+textBoxFromDate.place(x=175, y=115, height=21)
 
 textBoxToDate = Entry(root, state=DISABLED, width=10)
-textBoxToDate.place(x=320, y=80)
+textBoxToDate.place(x=320, y=115, height=21)
 
 buttonDiagram = Button(root, bg='#7fc7ff', font='Times 12', text="Вывести диаграмму", height=2)
-buttonDiagram.bind('<Button-1>', diagramma)
-buttonDiagram.place(x=250, y=130)
-
-buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить базу", width=13, height=2)
-buttonobnow.bind('<Button-1>', Download)
-buttonobnow.place(x=441, y=60)
+buttonDiagram.bind('<Button-1>', diagram)
+buttonDiagram.place(x=600, y=250)
 
 inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
-inputLabel.place(x=100, y=105)
+inputLabel.place(x=200, y=165)
 
-inputEntry = Entry(root, width=20)
+inputEntry = Entry(root, width=21)
 inputEntry.insert(0, "Adobe Photoshop")
-inputEntry.place(x=270, y=105)
+inputEntry.place(x=189, y=195)
 
 operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус обновления:", width=16)
-operation_label.place(x=600, y=63)
+operation_label.place(x=740, y=63)
 
 operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
-operation_status_label.place(x=600, y=87)
+operation_status_label.place(x=740, y=87)
 
 analysis_status_label = Label(root, background="#d9a925", state=DISABLED, text="Статус анализа:", width=16)
-analysis_status_label.place(x=600, y=133)
+analysis_status_label.place(x=740, y=133)
 
 operation_analysis_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
-operation_analysis_status_label.place(x=600, y=157)
+operation_analysis_status_label.place(x=740, y=157)
+
+save_label = Label(root, text="Варианты сохранения в файл", font='Times 12', width=25)
+save_label.place(x=923, y=50)
 
 print("Круг программы выполнен")
 root.mainloop()
