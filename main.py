@@ -6,61 +6,24 @@ from tkinter import messagebox
 from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from PIL import ImageTk, Image
-import time
-import os.path
 
 root = Tk() # Главное окно
 root.title("Welcome") # Название окна
 root.geometry("1200x700") # Размер окна
 root.configure(background='#f5f5f5') # Цвет заднего фона окна
-# Создание интерфейса
-radioButtonDateVar = BooleanVar() # Создание радиокнопок
-radioButtonDateVar.set(0)
-radioButtonDateOn = Radiobutton(root, text="По дате", bg='#FFFAFA', variable=radioButtonDateVar, value=1)
-radioButtonDateOff = Radiobutton(root, text="За все время", bg='#FFFAFA', variable=radioButtonDateVar, value=0)
-# Создание кнопок, полей, лейблов
-buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
-buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Удалить", width=13, height=2)
-buttonSave = Button(root, bg='#008B8B', font='Times 12', text="Сохранить", width=13, height=2)
-buttonSaveEach = Button(root, bg='#008B8B', font='Times 12', text="Сохранить каждый", width=14, height=2)
-labelLow = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Низкий")
-labelLowOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelMid = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Средний")
-labelMidOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelHigh = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Высокий")
-labelHighOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelSuper = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Критический")
-labelSuperOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
-labelDate = Label(root, text="Введите необходимую дату:", state=DISABLED,
-                  bg='#FFFAFA', font='Times 13', fg='#000', width=30)
-labelFromDate = Label(root, text=" От:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
-labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
 labelDateInfo = Label(root, text="Анализ уязвимостей Adobe Photoshop", bg='#008080',
                       font='Times 20', fg='#999', width=80)
-labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
-textBoxFromDate = Entry(root, state=DISABLED, width=10)
-textBoxToDate = Entry(root, state=DISABLED, width=10)
-buttonDiagram = Button(root, bg='#7fc7ff', font='Times 12', text="Вывести диаграмму", height=2)
-buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить базу", width=13, height=2)
-inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
-inputEntry = Entry(root, text='Adobe Photoshop', width=20)
-inputEntry.insert(0, "Adobe Photoshop")
-operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус обновления:", width=16)
-operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
-analysis_status_label = Label(root, background="#d9a925", state=DISABLED, text="Статус анализа:", width=16)
-operation_analysis_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
 
 
 def Status_executed(event):
     operation_status_label['text'] = "Выполнено"
 
 
-def download(event):
+def Download(event):
     operation_label.configure(state=NORMAL)
     operation_status_label['text'] = "Выполняется"
     operation_status_label.configure(state=NORMAL)
-    messagebox.showinfo("Info", "Подтвердите обновление базы данных")
+    root.update_idletasks()
 
     files = open('vullist.xlsx', "wb")
 
@@ -126,8 +89,7 @@ def Analysis(event): # Функция поиска уязвимостей
     analysis_status_label['state'] = NORMAL
     operation_analysis_status_label['text'] = "Выполняется"
     operation_analysis_status_label['state'] = NORMAL
-    messagebox.showinfo("Info", "Подтвердите начало анализа базы данных")
-    print("some new text")
+    root.update_idletasks()
     workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
     cell = workbook.sheet_by_index(0)
@@ -192,6 +154,8 @@ def Clear(event): # Функция для очистки лейблов и по�
     labelSuperOut['text'] = ""
     operation_status_label['text'] = ""
     operation_analysis_status_label['text'] = ""
+    operation_status_label['state'] = DISABLED
+    analysis_status_label['state'] = DISABLED
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
 
@@ -224,45 +188,45 @@ def SaveDocx(event): # Функция для сохранения результ
 
 
 def SaveDocxEach(event):
-    list_var = ["низкому", "среднему", "высокому", "критическому"]
-    list_var_1 = ["низких", "средних", "высоких", "критических"]
-    list_var_2 = ["Низкий", "Средний", "Высокий", "Критический"]
+    try:
+        list_var = ["низкому", "среднему", "высокому", "критическому"]
+        list_var_1 = ["низких", "средних", "высоких", "критических"]
+        list_var_2 = ["Низкий", "Средний", "Высокий", "Критический"]
 
-    for i in range(4):
-        document = docx.Document()
-        document.add_heading(name_software, 0)
-        document.add_heading('Количество уязвимостей по {} уровню опасности '.format(list_var[i]), level=1)
-        table = document.add_table(rows=1, cols=3)
+        for i in range(4):
+            document = docx.Document()
+            document.add_heading(name_software, 0)
+            document.add_heading('Количество уязвимостей по {} уровню опасности '.format(list_var[i]), level=1)
+            table = document.add_table(rows=1, cols=3)
 
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = '1'
-        hdr_cells[1].text = list_var_2[i]
+            hdr_cells = table.rows[0].cells
+            hdr_cells[0].text = '1'
+            hdr_cells[1].text = list_var_2[i]
 
-        if i == 0:
-            hdr_cells[2].text = str(labelLowOut['text'])
-        elif i == 1:
-            hdr_cells[2].text = str(labelMidOut['text'])
-        elif i == 2:
-            hdr_cells[2].text = str(labelHighOut['text'])
-        else:
-            hdr_cells[2].text = str(labelSuperOut['text'])
+            if i == 0:
+                hdr_cells[2].text = str(labelLowOut['text'])
+            elif i == 1:
+                hdr_cells[2].text = str(labelMidOut['text'])
+            elif i == 2:
+                hdr_cells[2].text = str(labelHighOut['text'])
+            else:
+                hdr_cells[2].text = str(labelSuperOut['text'])
 
-        document.save('Анализ {} уязвимостей {}.docx'.format(list_var_1[i], name_software))
+            document.save('Анализ {} уязвимостей {}.docx'.format(list_var_1[i], name_software))
+    except NameError:
+        messagebox.showerror("Error", "Сначал нужно провести анализ данных!")
 
 
 def diagramma(event):
     try:
-        print(danger_low)
-        labels = 'Низкий', 'Средний', 'Высокий', 'Критический'
+        labels = ["Низкий", "Средний", "Высокий", "Критический"]
         sizes = [danger_low, danger_middle, danger_hight, danger_super]
 
         colors = ("grey", "yellow", "orange", "brown")
         fig1, ax1 = plt.subplots()
-        explode = (0, 0, 0.1, 0.15)
-
-        ax1.pie(sizes, colors=colors, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
-        patches, texts, auto = ax1.pie(sizes, colors=colors, shadow=True, startangle=90, explode=explode, autopct='%1.1f%%' )
-
+        explode = (0.05, 0.15, 0.1, 0.1)
+        patches, texts, auto = ax1.pie(sizes, colors=colors, wedgeprops=dict(width=0.3),
+                                       explode=explode, autopct='%1.1f%%')
         plt.legend(patches, labels, loc="best")
         window = Tk()
         window.title("Диаграмма уязвимостей")
@@ -274,58 +238,108 @@ def diagramma(event):
         messagebox.showerror("Error", "Для вывода диаграммы необходимо провести анализ!")
 
 
-def show_image(event):
-    image_window = Tk()
-    image_window.title("cat_window")
-    image_window.geometry("500x500")
-    bg = PhotoImage(file="cat_image.png")  # pngegg.png
-    my_label = Label(image_window, image=bg)
-    my_label.place(x=0, y=0, relwidth=1, relheight=1)
-    print("ssdsgsrssgdh")
-
-
-buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
-buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
-radioButtonDateOff.bind('<Button-1>', dateOff)
-radioButtonDateOn.bind('<Button-1>', dateOn) #Привязка функции "dateOn" к радиокнопке "По дате"
-buttonSave.bind('<Button-1>', SaveDocx) #Привязка функции "SaveDocx" к кнопке "Сохранить в docx"
-buttonSaveEach.bind('<Button-1>', SaveDocxEach)
-buttonDiagram.bind('<Button-1>', diagramma)
-buttonobnow.bind('<Button-1>', download)
-
-image_button = Button(root, text="?", width=15)
-image_button.bind('<Button-1>', show_image)
-#inputEntry.bind('<Button-1>', dd)
-
-buttonobnow.place(x=441, y=60)
-buttonDiagram.place(x=250, y=130)
-labelDate.place(x=120, y=40)
+# Создание интерфейса
 labelDateInfo.pack()
-labelFromDate.place(x=130, y=80)
-textBoxFromDate.place(x=180, y=80)
-labelToDate.place(x=275, y=80)
-textBoxToDate.place(x=320, y=80)
-labelLow.place(x=30, y=130)
-labelLowOut.place(x=180, y=140)
-labelMid.place(x=30, y=180)
-labelMidOut.place(x=180, y=190)
-labelHigh.place(x=30, y=230)
-labelHighOut.place(x=180, y=240)
-labelSuper.place(x=30, y=280)
-labelSuperOut.place(x=180, y=290)
-buttonAnalysis.place(x=440, y=130) #Размещаем кнопки по координатам на плоскости окна
-buttonSave.place(x=440, y=200) #Размещаем кнопки по координатам на плоскости окна
-buttonSaveEach.place(x=580, y=200) #Размещаем кнопки по координатам на плоскости окна
-buttonClear.place(x=440, y=270) #Размещаем кнопки по координатам на плоскости окна
-inputLabel.place(x=100, y=105)
-inputEntry.place(x=270, y=105)
-radioButtonDateOn.pack(anchor=W)
+
+radioButtonDateVar = BooleanVar() # Создание радиокнопок
+radioButtonDateVar.set(0)
+
+radioButtonDateOn = Radiobutton(root, text="По дате", bg='#FFFAFA', variable=radioButtonDateVar, value=1)
+radioButtonDateOn.bind('<Button-1>', dateOn) #Привязка функции "dateOn" к радиокнопке "По дате"
+
+radioButtonDateOff = Radiobutton(root, text="За все время", bg='#FFFAFA', variable=radioButtonDateVar, value=0)
+radioButtonDateOff.bind('<Button-1>', dateOff)
+
 radioButtonDateOff.pack(anchor=W)
+radioButtonDateOn.pack(anchor=W)
+
+# Создание кнопок, полей, лейблов
+
+
+buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
+buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
+buttonAnalysis.place(x=440, y=130) #Размещаем кнопки по координатам на плоскости окна
+
+buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Удалить", width=13, height=2)
+buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
+buttonClear.place(x=440, y=270) #Размещаем кнопки по координатам на плоскости окна
+
+buttonSave = Button(root, bg='#008B8B', font='Times 12', text="Сохранить", width=13, height=2)
+buttonSave.bind('<Button-1>', SaveDocx)  #Привязка функции "SaveDocx" к кнопке "Сохранить в docx"
+buttonSave.place(x=440, y=200) #Размещаем кнопки по координатам на плоскости окна
+
+buttonSaveEach = Button(root, bg='#008B8B', font='Times 12', text="Сохранить каждый", width=14, height=2)
+buttonSaveEach.bind('<Button-1>', SaveDocxEach)
+buttonSaveEach.place(x=580, y=200) #Размещаем кнопки по координатам на плоскости окна
+
+labelLow = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Низкий")
+labelLow.place(x=30, y=130)
+
+labelLowOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
+labelLowOut.place(x=180, y=140)
+
+labelMid = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Средний")
+labelMid.place(x=30, y=180)
+
+labelMidOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
+labelMidOut.place(x=180, y=190)
+
+labelHigh = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Высокий")
+labelHigh.place(x=30, y=230)
+
+labelHighOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
+labelHighOut.place(x=180, y=240)
+
+labelSuper = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Критический")
+labelSuper.place(x=30, y=280)
+
+labelSuperOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
+labelSuperOut.place(x=180, y=290)
+
+labelDate = Label(root, text="Введите необходимую дату:", state=DISABLED,
+                  bg='#FFFAFA', font='Times 13', fg='#000', width=30)
+labelDate.place(x=120, y=40)
+
+labelFromDate = Label(root, text=" От:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
+labelFromDate.place(x=130, y=80)
+
+labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
+labelToDate.place(x=275, y=80)
+
+labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
+
+textBoxFromDate = Entry(root, state=DISABLED, width=10)
+textBoxFromDate.place(x=180, y=80)
+
+textBoxToDate = Entry(root, state=DISABLED, width=10)
+textBoxToDate.place(x=320, y=80)
+
+buttonDiagram = Button(root, bg='#7fc7ff', font='Times 12', text="Вывести диаграмму", height=2)
+buttonDiagram.bind('<Button-1>', diagramma)
+buttonDiagram.place(x=250, y=130)
+
+buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить базу", width=13, height=2)
+buttonobnow.bind('<Button-1>', Download)
+buttonobnow.place(x=441, y=60)
+
+inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
+inputLabel.place(x=100, y=105)
+
+inputEntry = Entry(root, width=20)
+inputEntry.insert(0, "Adobe Photoshop")
+inputEntry.place(x=270, y=105)
+
+operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус обновления:", width=16)
 operation_label.place(x=600, y=63)
+
+operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
 operation_status_label.place(x=600, y=87)
+
+analysis_status_label = Label(root, background="#d9a925", state=DISABLED, text="Статус анализа:", width=16)
 analysis_status_label.place(x=600, y=133)
+
+operation_analysis_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
 operation_analysis_status_label.place(x=600, y=157)
-image_button.place(x=1000, y=600)
-#print(os.path.exists('vullist.xlsx'))
+
 print("Круг программы выполнен")
 root.mainloop()
