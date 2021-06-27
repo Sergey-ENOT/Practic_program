@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 root = Tk() # Главное окно
-root.title("Welcome") # Название окна
+root.title("Анализ уязвимостей ПО") # Название окна
 root.geometry("1200x700") # Размер окна
 root.configure(background='#0a3b4f') # Цвет заднего фона окна
 labelDateInfo = Label(root, text="Анализ уязвимостей Adobe Photoshop", bg='#008080',
