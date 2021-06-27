@@ -84,7 +84,6 @@ def Analysis(event): # Функция поиска уязвимостей
     analysis_status_label['state'] = NORMAL
     operation_analysis_status_label['text'] = "Выполняется"
     operation_analysis_status_label['state'] = NORMAL
-    analysis_result.configure(background='#e6dd43', foreground='#29281d')
     root.update_idletasks()
     workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
@@ -150,7 +149,6 @@ def Clear(event): # Функция для очистки лейблов и по�
     operation_analysis_status_label['text'] = ""
     operation_status_label['state'] = DISABLED
     analysis_status_label['state'] = DISABLED
-    analysis_result.configure(background='#0a3b4f', foreground='#0a3b4f')
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
 
@@ -237,6 +235,18 @@ def diagram(event):
 # Создание кнопок, полей, лейблов, их бинд и расположение
 labelDateInfo.pack()
 
+canvas_settings = Canvas(root, width=558, height=227, background="#732626")
+canvas_settings.place(x=0, y=38)
+
+canvas_analysis_result = Canvas(root, width=558, height=170, background="#722626")
+canvas_analysis_result.place(x=0, y=298)
+
+canvas_function = Canvas(root, width=266, height=227, background="#722626")
+canvas_function.place(x=598, y=38)
+
+canvas_save = Canvas(root, width=276, height=227, background="#722626")
+canvas_save.place(x=898, y=38)
+
 radioButtonDateVar = BooleanVar() # Создание радиокнопок
 radioButtonDateVar.set(0)
 
@@ -246,52 +256,55 @@ radioButtonDateOn.bind('<Button-1>', dateOn) #Привязка функции "d
 radioButtonDateOff = Radiobutton(root, text="За все время", bg='#447185', variable=radioButtonDateVar, value=0)
 radioButtonDateOff.bind('<Button-1>', dateOff)
 
-radioButtonDateOff.place(x=0, y=37)
-radioButtonDateOn.place(x=0, y=72)
+radioButtonDateOff.place(x=450, y=75)
+radioButtonDateOn.place(x=45, y=75)
 
-analysis_result = Label(root, font='Times 14', background='#0a3b4f', foreground='#0a3b4f',
-                        text="Результаты анализа данных:", width=30)
-analysis_result.place(x=126, y=300)
+analysis_result = Label(root, background='#e6dd43', foreground='#29281d',
+                        text="Результаты анализа данных:", font=('Times', 16), width=46)
+analysis_result.place(x=2, y=300)
 
-buttonAnalysis = Button(root, bg='#008B8B', font='Times 12', text="Анализ", width=13, height=2)
+function_label = Label(root, text="Функции", background='orange', font=('Times', 14), width=26)
+function_label.place(x=600, y=40)
+
+buttonAnalysis = Button(root, background='#709972', font='Times 12', text="Анализ", width=13, height=2)
 buttonAnalysis.bind('<Button-1>', AnalysisWithDate) #Привязка функции "AnalysisWithDate" к кнопке "Анализ"
-buttonAnalysis.place(x=600, y=130) #Размещаем кнопки по координатам на плоскости окна
+buttonAnalysis.place(x=601, y=140) #Размещаем кнопки по координатам на плоскости окна
 
 buttonobnow = Button(root, bg='#ffd35f', font='Times 12', text="Обновить базу", width=13, height=2)
 buttonobnow.bind('<Button-1>', Download)
-buttonobnow.place(x=600, y=60)
+buttonobnow.place(x=601, y=70)
 
 buttonClear = Button(root, bg='#008B8B', font='Times 12', text="Очистить поля", width=13, height=2)
 buttonClear.bind('<Button-1>', Clear) #Привязка функции "Clear" к кнопке "Очистить все"
 buttonClear.place(x=1000, y=600) #Размещаем кнопки по координатам на плоскости окна
 
-buttonSave = Button(root, bg='#008B8B', font='Times 12', text="Сохранить всё \n в один", width=13, height=2)
+buttonSave = Button(root, background='#e6a87c', font='Times 12', text="Сохранить всё \n в один", width=13, height=2)
 buttonSave.bind('<Button-1>', SaveDocx)  #Привязка функции "SaveDocx" к кнопке "Сохранить в docx"
-buttonSave.place(x=900, y=100) #Размещаем кнопки по координатам на плоскости окна
+buttonSave.place(x=901, y=70) #Размещаем кнопки по координатам на плоскости окна
 
-buttonSaveEach = Button(root, bg='#008B8B', font='Times 12', text="Сохранить каждый \n отдельно", width=14, height=2)
+buttonSaveEach = Button(root, background='#e6a87c', font='Times 12', text="Сохранить каждый \n отдельно", width=14, height=2)
 buttonSaveEach.bind('<Button-1>', SaveDocxEach)
-buttonSaveEach.place(x=1045, y=100) #Размещаем кнопки по координатам на плоскости окна
+buttonSaveEach.place(x=1040, y=70) #Размещаем кнопки по координатам на плоскости окна
 
-labelLow = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Низкий")
+labelLow = Label(root, width=13, height=2, bg='#00ff00', font='Times 13', text="Низкий")
 labelLow.place(x=15, y=350)
 
 labelLowOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
 labelLowOut.place(x=48, y=405)
 
-labelMid = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Средний")
+labelMid = Label(root, width=13, height=2, bg='#0099ff', font='Times 13', text="Средний")
 labelMid.place(x=150, y=350)
 
 labelMidOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
 labelMidOut.place(x=181, y=405)
 
-labelHigh = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Высокий")
+labelHigh = Label(root, width=13, height=2, bg='#ff0099', font='Times 13', text="Высокий")
 labelHigh.place(x=285, y=350)
 
 labelHighOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
 labelHighOut.place(x=317, y=405)
 
-labelSuper = Label(root, width=13, height=2, bg='#008080', font='Times 13', text="Критический")
+labelSuper = Label(root, width=13, height=2, bg='#ff0000', font='Times 13', text="Критический")
 labelSuper.place(x=420, y=350)
 
 labelSuperOut = Label(root, bg='#ffffff', font='Times 15', fg='black', width=5)
@@ -299,47 +312,51 @@ labelSuperOut.place(x=451, y=405)
 
 labelDate = Label(root, text="Введите необходимую дату:", state=DISABLED,
                   bg='#FFFAFA', font='Times 13', fg='#000', width=30)
-labelDate.place(x=115, y=75)
+labelDate.place(x=145, y=75)
 
 labelFromDate = Label(root, text=" От:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
-labelFromDate.place(x=120, y=115)
+labelFromDate.place(x=155, y=115)
 
 labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
-labelToDate.place(x=265, y=115)
+labelToDate.place(x=295, y=115)
 
 labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
 
 textBoxFromDate = Entry(root, state=DISABLED, width=10)
-textBoxFromDate.place(x=175, y=115, height=21)
+textBoxFromDate.place(x=205, y=115, height=21)
 
 textBoxToDate = Entry(root, state=DISABLED, width=10)
-textBoxToDate.place(x=320, y=115, height=21)
+textBoxToDate.place(x=345, y=115, height=21)
 
-buttonDiagram = Button(root, bg='#7fc7ff', font='Times 12', text="Вывести диаграмму", height=2)
-buttonDiagram.bind('<Button-1>', diagram)
-buttonDiagram.place(x=600, y=250)
+button_diagram = Button(root, bg='#7fc7ff', font='Times 12', text="Вывести \n диаграмму", height=2, width=13)
+button_diagram.bind('<Button-1>', diagram)
+button_diagram.place(x=601, y=215)
 
-inputLabel = Label(root, background="violet", font='Times 11', text="Название ПО", width=13)
-inputLabel.place(x=200, y=165)
+inputLabel = Label(root, background="#1689e0", font='Times 11', text="Название ПО", width=13)
+inputLabel.place(x=225, y=165)
 
 inputEntry = Entry(root, width=21)
 inputEntry.insert(0, "Adobe Photoshop")
-inputEntry.place(x=189, y=195)
+inputEntry.place(x=212, y=195)
 
-operation_label = Label(root, background="#ffbb00", state=DISABLED, text="Статус обновления:", width=16)
-operation_label.place(x=740, y=63)
+operation_label = Label(root, background="#d9a925", state=DISABLED, text="Статус обновления:", width=16)
+operation_label.place(x=740, y=73)
 
-operation_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
-operation_status_label.place(x=740, y=87)
+operation_status_label = Label(root, background="#97fa02", state=DISABLED, text="", width=16)
+operation_status_label.place(x=740, y=97)
 
 analysis_status_label = Label(root, background="#d9a925", state=DISABLED, text="Статус анализа:", width=16)
-analysis_status_label.place(x=740, y=133)
+analysis_status_label.place(x=740, y=143)
 
-operation_analysis_status_label = Label(root, background="#ffbb00", state=DISABLED, text="", width=16)
-operation_analysis_status_label.place(x=740, y=157)
+operation_analysis_status_label = Label(root, background="#97fa02", state=DISABLED, text="", width=16)
+operation_analysis_status_label.place(x=740, y=167)
 
-save_label = Label(root, text="Варианты сохранения в файл", font='Times 12', width=25)
-save_label.place(x=923, y=50)
+save_label = Label(root, text="Варианты сохранения в файл", font='Times 13', background="orange", width=30)
+save_label.place(x=900, y=40)
+
+settings_label = Label(root, text="Настройки анализа данных", background="#9e9b9b", foreground="#3b00ff",
+                       font=('Times', 16), width=46)
+settings_label.place(x=2, y=40)
 
 print("Круг программы выполнен")
 root.mainloop()
