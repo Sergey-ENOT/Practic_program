@@ -99,7 +99,7 @@ def Analysis(event): # Функция поиска уязвимостей
         # выполним считывание списка данных из столбца с данными Уровень опасности
         danger_levels = sheet.col_values(12)  # (12-й столбец, нумерация с нуля)
         chrb = radioButtonDateVar.get()
-        ddd = sheet.col_values(9)
+        date_file = sheet.col_values(9)
         global name_software
         name_software = inputEntry.get()
 
@@ -114,22 +114,22 @@ def Analysis(event): # Функция поиска уязвимостей
             dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
 
         for i in range(9, row):
-            if ddd[i] != '':
-                ddd[i] = datetime.strptime(ddd[i], '%d.%m.%Y')
+            if date_file[i] != '':
+                date_file[i] = datetime.strptime(date_file[i], '%d.%m.%Y')
             else:
-                ddd[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
+                date_file[i] = datetime.strptime('01.01.1900', '%d.%m.%Y')
 
         for i in range(4, row):
-            if (str(ddd[i]) >= str(dataFrom)) and (str(ddd[i]) <= str(dataTo)):
-                if names[i].find(name_software) >= 0:  # если наименование ПО содержит искомое проверим по первой
+            if (str(date_file[i]) >= str(dataFrom)) and (str(date_file[i]) <= str(dataTo)):
+                if names[i].find(name_software) >= 0:      # если наименование ПО содержит искомое проверим по первой
                                                            # букве уровень уязвимости ПО
-                    if danger_levels[i][0] == 'К':  # Критический
+                    if danger_levels[i][0] == 'К':    # Критический
                         danger_super += 1
                     elif danger_levels[i][0] == 'В':  # Высокий
                         danger_hight += 1
                     elif danger_levels[i][0] == 'С':  # Средний
                         danger_middle += 1
-                    else: # Низкий
+                    else:                             # Низкий
                         danger_low += 1
 
         labelLowOut['text'] = danger_low
@@ -148,6 +148,7 @@ def Clear(event): # Функция для очистки лейблов и по�
     operation_status_label['text'] = ""
     operation_analysis_status_label['text'] = ""
     operation_status_label['state'] = DISABLED
+    operation_label['state'] = DISABLED
     analysis_status_label['state'] = DISABLED
     textBoxFromDate.delete(0, END)
     textBoxToDate.delete(0, END)
@@ -282,7 +283,8 @@ buttonSave = Button(root, background='#e6a87c', font='Times 12', text="Сохр�
 buttonSave.bind('<Button-1>', SaveDocx)  #Привязка функции "SaveDocx" к кнопке "Сохранить в docx"
 buttonSave.place(x=901, y=70) #Размещаем кнопки по координатам на плоскости окна
 
-buttonSaveEach = Button(root, background='#e6a87c', font='Times 12', text="Сохранить каждый \n отдельно", width=14, height=2)
+buttonSaveEach = Button(root, background='#e6a87c', font='Times 12', text="Сохранить каждый \n отдельно",
+                        width=14, height=2)
 buttonSaveEach.bind('<Button-1>', SaveDocxEach)
 buttonSaveEach.place(x=1040, y=70) #Размещаем кнопки по координатам на плоскости окна
 
@@ -319,8 +321,6 @@ labelFromDate.place(x=155, y=115)
 
 labelToDate = Label(root, text="До:", state=DISABLED, bg='#FFFAFA', fg='black', width=5)
 labelToDate.place(x=295, y=115)
-
-labelToInfo = Label(root, bg='#FFFAFA', fg='black', width=20)
 
 textBoxFromDate = Entry(root, state=DISABLED, width=10)
 textBoxFromDate.place(x=205, y=115, height=21)
