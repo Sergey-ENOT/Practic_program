@@ -113,7 +113,7 @@ def Analysis(event): # Функция поиска уязвимостей
             dataFrom = datetime.strptime(textBoxFromDate.get(), '%d.%m.%Y')
             dataTo = datetime.strptime(textBoxToDate.get(), '%d.%m.%Y')
 
-        for i in range(9, row):
+        for i in range(4, row):
             if date_file[i] != '':
                 date_file[i] = datetime.strptime(date_file[i], '%d.%m.%Y')
             else:
@@ -123,14 +123,17 @@ def Analysis(event): # Функция поиска уязвимостей
             if (str(date_file[i]) >= str(dataFrom)) and (str(date_file[i]) <= str(dataTo)):
                 if names[i].find(name_software) >= 0:      # если наименование ПО содержит искомое проверим по первой
                                                            # букве уровень уязвимости ПО
-                    if danger_levels[i][0] == 'К':    # Критический
-                        danger_super += 1
-                    elif danger_levels[i][0] == 'В':  # Высокий
-                        danger_hight += 1
-                    elif danger_levels[i][0] == 'С':  # Средний
-                        danger_middle += 1
-                    else:                             # Низкий
-                        danger_low += 1
+                    if danger_levels[i] == "":
+                        pass
+                    else:
+                        if danger_levels[i][0] == 'К':    # Критический
+                            danger_super += 1
+                        elif danger_levels[i][0] == 'В':  # Высокий
+                            danger_hight += 1
+                        elif danger_levels[i][0] == 'С':  # Средний
+                            danger_middle += 1
+                        else:                             # Низкий
+                            danger_low += 1
 
         labelLowOut['text'] = danger_low
         labelMidOut['text'] = danger_middle
