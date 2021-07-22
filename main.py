@@ -87,6 +87,7 @@ def Analysis(event): # Функция поиска уязвимостей
     root.update_idletasks()
     workbook = xlrd2.open_workbook('vullist.xlsx')
     sheet = workbook.sheet_by_index(0)
+    pass_counter = 0
 
     row = sheet.nrows  # определяем количество записей (строк) на листе
     if row == 0:
@@ -124,7 +125,7 @@ def Analysis(event): # Функция поиска уязвимостей
                 if names[i].find(name_software) >= 0:      # если наименование ПО содержит искомое проверим по первой
                                                            # букве уровень уязвимости ПО
                     if danger_levels[i] == "":
-                        pass
+                        pass_counter += 1
                     else:
                         if danger_levels[i][0] == 'К':    # Критический
                             danger_super += 1
@@ -140,7 +141,7 @@ def Analysis(event): # Функция поиска уязвимостей
         labelHighOut['text'] = danger_hight
         labelSuperOut['text'] = danger_super
         operation_analysis_status_label['text'] = "Выполнено"
-        messagebox.showinfo("Info ", "Анализ базы данных завершён")
+        messagebox.showinfo("Info ", "Анализ базы данных завершён" + "\n" + "found pass rows {}".format(pass_counter))
 
 
 def Clear(event): # Функция для очистки лейблов и полей
